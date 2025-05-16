@@ -1,0 +1,15 @@
+<p style="color: green"><%= notice %></p>
+
+<div class="border rounded p-3 mt-3 mb-3">
+  <p><strong>ФИО:</strong> <%= @phone.name %></p>
+  <p><strong>Должность:</strong> <%= @phone.position %></p>
+  <p><strong>Внутренний:</strong> <%= @phone.number %></p>
+  <p><strong>Мобильный:</strong> <%= @phone.mobile %></p>
+  <p><strong>Электронка:</strong> <%= @phone.email %></p>
+</div>
+<div>
+  <%= link_to "Редактировать запись", edit_phone_path(@phone) %> |
+  <%= link_to "Назад", phones_path %>
+  <%= button_to "Удалить эту запись", @phone, method: :delete, data: { turbo_method: 'delete', turbo_confirm: "вы уверены?" },
+    class: "btn btn-danger text-white text-decoration-none mt-3" %>
+</div>

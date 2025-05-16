@@ -1,137 +1,24 @@
-  mkdir devise
+# README
 
-git clone https://github.com/YouraSilin/devise.git devise
+This README would normally document whatever steps are necessary to get the
+application up and running.
 
-cd devise
+Things you may want to cover:
 
-docker compose build
+* Ruby version
 
-docker compose run --no-deps web rails new . --force --database=postgresql --css=bootstrap
+* System dependencies
 
-replace this file https://github.com/YouraSilin/devise/blob/main/config/database.yml
-  
-docker compose up
+* Configuration
 
-docker compose exec web rake db:create db:migrate
+* Database creation
 
-sudo chown -R $USER:$USER .
+* Database initialization
 
-add this line to Gemfile:
+* How to run the test suite
 
-   gem "devise"
+* Services (job queues, cache servers, search engines, etc.)
 
-docker compose exec web bundle install
+* Deployment instructions
 
-docker compose exec web rails generate devise:install
-
-docker compose exec web rails generate devise User
-
-docker compose exec web rails generate migration AddRoleToUsers role:string
-
-rails db:migrate
-
-sudo chown -R $USER:$USER .
-
-В файл app/views/layouts/application.html.erb добавьте:
-
-&lt;p class="notice"&gt;&lt;%= notice %&gt;&lt;/p&gt;
-
-&lt;p class="alert"&gt;&lt;%= alert %&gt;&lt;/p&gt;
-
-Модифицируйте модель User (app/models/user.rb), чтобы задать роли:
-
-class User < ApplicationRecord
-
-  # Devise модули
-  
-  devise :database_authenticatable, :registerable,
-  
-         :recoverable, :rememberable, :validatable
-
-  # Установим роли
-  
-  enum role: { viewer: 'viewer', admin: 'admin' }
-
-  # Зададим роль по умолчанию
-  
-  after_initialize do
-  
-    self.role ||= :viewer
-    
-  end
-  
-end
-
-Задайте дефолтную роль в консоли (для существующих пользователей).
-
-docker compose exec web rails c "User.update_all(role: 'viewer')"
-
-Создайте два контроллера — один для просмотра (режим просмотра) и другой для админки (режим редактирования).
-
-Пример: создадим ресурс Posts.
-
-docker compose exec web rails generate scaffold Post title:string content:text
-
-docker compose exec web rails db:migrate
-
-Ограничиваем доступ в контроллере:
-
-Модифицируйте PostsController:
-
-class PostsController < ApplicationController
-
-  before_action :authenticate_user!
-  
-  before_action :authorize_admin, only: [:edit, :update, :destroy]
-
-  # Только администратор может редактировать и удалять
-  
-  def authorize_admin
-  
-    redirect_to root_path, alert: 'У вас нет прав для этого действия.' unless current_user.admin?
-  
-  end
-
-end
-
-Ограничиваем доступ в контроллере:
-
-Модифицируйте PostsController:
-
-class PostsController < ApplicationController
-
-  before_action :authenticate_user!
-  
-  before_action :authorize_admin, only: [:edit, :update, :destroy]
-
-  # Только администратор может редактировать и удалять
-  
-  def authorize_admin
-    
-    redirect_to root_path, alert: 'У вас нет прав для этого действия.' unless current_user.admin?
-  
-  end
-
-end
-
-Добавьте проверку прав администратора в представления, где доступны действия редактирования и удаления:
-
-<% if current_user.admin? %>
-  
-  <%= link_to 'Редактировать', edit_post_path(post) %>
-  
-  <%= link_to 'Удалить', post_path(post), method: :delete, data: { confirm: 'Вы уверены?' } %>
-
-<% end %>
-
-Добавление администратоа
-
-docker exec web rails c
-
-Найдите пользователя, который должен стать администратором:
-
-user = User.find_by(email: "email@example.com")
-
-Установите ему роль admin:
-
-user.update(role: "admin")
+* ...

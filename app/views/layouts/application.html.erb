@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Телефоны</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.4.js" integrity="sha256-a9jBBRygX1Bh5lt8GZjXDzyOB+bWve9EiO7tROUtj/E=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+    
+    <style>
+      #loader {
+        position: fixed;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        z-index: 99999;
+        background: url(<%= asset_path 'spin.gif' %>) 50% 50% no-repeat;
+      }
+      .alert {
+        display: none;
+        opacity: 0;
+        position: fixed;
+        right: 0px;
+        bottom: 0px;
+        z-index: 99999;
+      }
+      @keyframes fadeInFromNone {
+        0% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+      @keyframes fadeOutFromBlock {
+        0% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+      .my_bttn{
+      height: 45px;
+      width: 45px;
+      background-color: #4181fa;
+      border: none;
+      color: white;
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      border-radius: 5px;
+      cursor: pointer;
+      outline: none;
+      display: none;
+      }
+      .my_bttn:hover{ }
+    </style>
+
+  </head>
+
+  <body>
+    <div id="loader" style="display:none;"></div>
+    <nav class="navbar navbar-expand-lg bg-light">
+      <div class="container-fluid">
+      <%= link_to "Телефоны", phones_path, class: "navbar-brand" %>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <form class="d-flex">
+            </form>
+            <li class="nav-item">
+                  <%= link_to "НЬЮТОН ПЛАЗА", phones_path(department: "НЬЮТОН ПЛАЗА"), class: "nav-link #{params[:department] == 'НЬЮТОН ПЛАЗА' ? 'active' : ''}" %>
+                </li>
+                <li class="nav-item">
+                  <%= link_to "НАВИГАТОР", phones_path(department: "НАВИГАТОР"), class: "nav-link #{params[:department] == 'НАВИГАТОР' ? 'active' : ''}" %>
+                </li>
+                <li class="nav-item">
+                  <%= link_to "ЗИЛ", phones_path(department: "ЗИЛ"), class: "nav-link #{params[:department] == 'ЗИЛ' ? 'active' : ''}" %>
+                </li>
+          </ul>
+          <ul class="navbar-nav ms-auto">
+            <% if user_signed_in? %>
+              <li class="nav-item">
+                <span class="nav-link">Вы зашли как: <strong><%= current_user.email %></strong></span>
+              </li>
+              <li class="nav-item">
+                <%= button_to "Выйти", destroy_user_session_path, method: :delete, class: "nav-link" %>
+              </li>
+            <% else %>
+              <li class="nav-item">
+                <%= link_to "Войти", new_user_session_path, class: "nav-link" %>
+              </li>
+              <li class="nav-item">
+                <%= link_to "Регистрация", new_user_registration_path, class: "nav-link" %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="ms-2 me-3 mt-3 ">
+
+      <% if flash[:alert] %>
+        <div class="alert alert-danger">
+          <%= flash[:alert] %>
+        </div>
+      <% end %>
+    
+      <% if flash[:notice] %>
+        <div class="alert alert-success">
+          <%= flash[:notice] %>
+        </div>
+      <% end %>
+
+      <% if notice %>
+        <%= render 'layouts/alerts'%>
+      <% end %>
+      
+      <%= yield %>
+      
+      <!-- Добавлен скрипт для управления спиннером -->
+      <script>
+        $(document).ready(function() {
+          $('.download-file').click(function(event) {
+            // Показываем спиннер
+            $("#loader").css("display", "block");
+            
+            // Убираем спиннер через фиксированный таймаут
+            setTimeout(function() {
+              $("#loader").css("display", "none");
+            }, 1200); // Задайте подходящий таймаут
+          });
+          $(document).on('click', '.spinner', function() {
+          // Показываем спиннер
+          $("#loader").css("display", "block");
+          // Здесь не останавливаем выполнение стандартного поведения!
+        });
+
+          // Отображение и автозакрытие alert-уведомлений
+          $(".alert").css("display", "block").css("opacity", "1").css("animation", "fadeInFromNone 1.2s");
+          setTimeout(function() {
+            $('.alert').fadeOut(1200);
+          }, 2000);
+        });
+      </script>
+
+      <!-- Back-to-top button -->
+      <script>
+      $(document).ready(function(){
+          $(window).scroll(function(){
+              if($(window).scrollTop()>300){
+            $('.my_bttn').fadeIn(250);
+        }
+        else{
+            $('.my_bttn').fadeOut(250);
+        }
+          });
+          $('.my_bttn').click(function(){
+        $('html,body').animate(
+            {scrollTop:0},400
+        );
+          });
+      });
+      </script>
+    </div>
+    <button class="my_bttn">
+      <i class="fa fa-arrow-up"></i>
+    </button>
+
+<!-- <footer class="bg-light text-center text-lg-start fixed-bottom"> %> -->
+<!-- Copyright -->
+<!-- <div class="text-center p-3"> -->
+<!-- &copy; @Youra <%= Time.now.year%>. All Rights Reserved. -->
+<!-- </div> -->
+<!-- Copyright -->
+<!-- </footer> -->
+
+  </body>
+</html>

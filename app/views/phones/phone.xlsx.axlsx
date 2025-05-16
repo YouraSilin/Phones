@@ -1,0 +1,14 @@
+wb = xlsx_package.workbook
+
+s = wb.styles
+header = s.add_style bg_color: 'DD', sz: 12, b: true, alignment: { horizontal: :center }
+
+wb.add_worksheet(name: "Phones") do |sheet|
+  
+  sheet.add_row ['БЦ', 'ФИО', 'Должность', 'Внутренний', 'Мобильный', 'Электронка', ]
+  @phones.each do |phone|
+    label = s.add_style alignment: { indent: 1 }
+    name = s.add_style
+    sheet.add_row [phone.department, phone.name, phone.position, phone.number, phone.mobile, phone.email, ], style: [label,name,label,label,label,label]
+  end
+end

@@ -1,0 +1,12 @@
+<h1>Редактирование записи</h1>
+
+<%= render "form", phone: @phone %>
+
+<br>
+
+<div>
+  <%= link_to "Показать этот телефон", @phone %> |
+  <%= link_to "Назад", phones_path %>
+  <%= button_to "Удалить эту запись", @phone, method: :delete, data: { turbo_method: 'delete', turbo_confirm: "вы уверены?" },
+    class: "btn btn-danger text-white text-decoration-none mt-3" %>
+</div>
