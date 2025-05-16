@@ -2,42 +2,38 @@ class PhonesController < ApplicationController
 
   before_action :authorize_admin, only: [:create, :edit, :update, :destroy]
 
-  @phones = Phone.all.sort_by do |phone|
-    [phone.number.nil? ? 1 : 0, phone.number || '', phone.name || '']
-  end
+  
   
     # GET /phones or /phones.json
-  def index
-    respond_to do |format|
-      format.html do
-        # Базовая выборка телефонов
-        @phones = Phone.all
-  
-        # Фильтры по департаменту
-        if params[:department].present?
-          @phones = @phones.where(department: params[:department])
+    def index
+      respond_to do |format|
+        format.html do
+          @phones = fetch_phones
         end
   
-        # Поиск по имени или номеру
-        if params[:query].present?
-          query = "%#{params[:query]}%"
-          @phones = @phones.where("department ILIKE :query OR name ILIKE :query OR position ILIKE :query OR number ILIKE :query OR mobile ILIKE :query OR email ILIKE :query", query: query)
+        format.xlsx do
+          @phones = Phone.order(:created_at)
+          render xlsx: 'Телефоны', template: 'phones/phone'
         end
-  
-        # Сортировка записей
-        @phones = @phones.order(
-          Arel.sql('CASE WHEN phones.number IS NOT NULL THEN 0 ELSE 1 END ASC'),
-          Arel.sql('number ASC NULLS LAST'),
-          :name
-        )
-      end
-  
-      format.xlsx do
-        @phones = Phone.order(:created_at)
-        render xlsx: 'Телефоны', template: 'phones/phone'
       end
     end
-  end
+  
+    # Импорт телефонов
+    def import
+      begin
+        result = Phones::Import.call(params[:file])
+        redirect_to phones_path, notice: "#{result.imported_count} строк импортировано"
+      rescue StandardError => e
+        redirect_to phones_path, alert: "Ошибка импорта: #{e.message}"
+      end
+    end
+  
+    # Удаление всех телефонов
+    def delete_all
+      Phone.destroy_all
+      redirect_to phones_path, notice: 'Все телефоны успешно удалены.'
+    end
+  
   
   # GET /phones/1 or /phones/1.json
   def show
@@ -105,6 +101,29 @@ class PhonesController < ApplicationController
   end
 
   private
+  
+    def fetch_phones
+      phones = Phone.all
+  
+      # Применяем фильтр по департаменту, если нужно
+      phones = filter_by_department(phones) if params[:department].present?
+  
+      # Применяем сортировку
+      phones.order(
+        Arel.sql('CASE WHEN phones.number IS NOT NULL THEN 0 ELSE 1 END ASC'),
+        Arel.sql('number ASC NULLS LAST'),
+        :name
+      )
+    end
+  
+    def filter_by_department(phones)
+      phones.where(department: params[:department])
+    end
+  
+    def search_query(phones)
+      query = "%#{params[:query]}%"
+      phones.where("department ILIKE :query OR name ILIKE :query OR position ILIKE :query OR number ILIKE :query OR mobile ILIKE :query OR email ILIKE :query", query: query)
+    end
 
   def authorize_admin
     redirect_to phones_path, alert: 'У вас нет прав для этого действия.' unless current_user&.admin?
